@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zodiac Sign Finder</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #8b5cf6;
+            --text-color: #f8fafc;
+            --muted-text: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: var(--text-color);
+            font-size: 2rem;
+            letter-spacing: 1px;
+        }
+
+        p.subtitle {
+            color: var(--muted-text);
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        select {
+            background-color: #334155;
+            color: var(--text-color);
+            border: 2px solid #475569;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--accent-color);
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #7c3aed;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .result-card {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid #334155;
+            display: none;
+            text-align: left;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .zodiac-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .zodiac-name {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin: 0;
+        }
+
+        .zodiac-date {
+            color: var(--muted-text);
+            font-style: italic;
+            margin: 0;
+        }
+
+        .meta-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .meta-item strong {
+            color: var(--muted-text);
+            display: block;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .details p {
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Zodiac Finder</h1>
+        <p class="subtitle">Select your birth date and month to discover your sign</p>
+        
+        <div class="input-group">
+            <select id="month">
+                <option value="" disabled selected>Month</option>
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+
+            <select id="day">
+                <option value="" disabled selected>Day</option>
+                </select>
+        </div>
+
+        <button onclick="findZodiac()">Reveal My Sign</button>
+
+        <div id="result" class="result-card">
+            <div class="zodiac-header">
+                <div>
+                    <h2 class="zodiac-name" id="zodiac-name">Aries</h2>
+                    <p class="zodiac-date" id="zodiac-range">(Mar 21 - Apr 19)</p>
+                </div>
+            </div>
+            
+            <div class="meta-info">
+                <div class="meta-item">
+                    <strong>Element</strong>
+                    <span id="zodiac-element">Fire</span>
+                </div>
+                <div class="meta-item">
+                    <strong>Ruling Planet</strong>
+                    <span id="zodiac-planet">Mars</span>
+                </div>
+                <div class="meta-item" style="grid-column: span 2;">
+                    <strong>Strengths</strong>
+                    <span id="zodiac-strengths">Courageous, determined, confident</span>
+                </div>
+            </div>
+
+            <div class="details">
+                <strong>Personality Profile:</strong>
+                <p id="zodiac-description"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Populate the Days drop-down dynamically (1 to 31)
+        const daySelect = document.getElementById('day');
+        for (let i = 1; i <= 31; i++) {
+            let option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            daySelect.appendChild(option);
+        }
+
+        // Comprehensive database of Zodiac profiles
+        const zodiacData = [
+            { name: "Capricorn", startMonth: 12, startDay: 22, element: "Earth", planet: "Saturn", strengths: "Responsible, disciplined, self-control", desc: "Capricorns are masters of self-control and have the ability to lead the way, make solid and realistic plans, and manage many people who work for them at any time." },
+            { name: "Aquarius", startMonth: 1, startDay: 20, element: "Air", planet: "Uranus", strengths: "Progressive, original, independent", desc: "Aquarians are thin-skinned and highly sensitive, needing space and time alone to recharge. They look at the world as a place full of possibilities." },
+            { name: "Pisces", startMonth: 2, startDay: 19, element: "Water", planet: "Neptune", strengths: "Compassionate, artistic, intuitive", desc: "Pisces are very friendly, so they often find themselves in a company of very different people. They are selfless and always willing to help others." },
+            { name: "Aries", startMonth: 3, startDay: 21, element: "Fire", planet: "Mars", strengths: "Courageous, determined, confident, enthusiastic", desc: "As the first sign in the zodiac, the presence of Aries always marks the beginning of something energetic and turbulent. They are continuously looking for dynamic speed and competition." },
+            { name: "Taurus", startMonth: 4, startDay: 20, element: "Earth", planet: "Venus", strengths: "Reliable, patient, practical, devoted", desc: "Practical and well-grounded, Taurus is the sign that harvests the fruits of labor. They feel the need to always be surrounded by love and beauty." },
+            { name: "Gemini", startMonth: 5, startDay: 21, element: "Air", planet: "Mercury", strengths: "Gentle, affectionate, curious, adaptable", desc: "Expressive and quick-witted, Gemini represents two different personalities in one and you will never be sure which one you will face. They are sociable and ready for fun." },
+            { name: "Cancer", startMonth: 6, startDay: 21, element: "Water", planet: "Moon", strengths: "Tenacious, highly imaginative, loyal, sympathetic", desc: "Deeply intuitive and sentimental, Cancer can be one of the most challenging zodiac signs to get to know. They are very emotional and sensitive, and care deeply about matters of the family." },
+            { name: "Leo", startMonth: 7, startDay: 23, element: "Fire", planet: "Sun", strengths: "Creative, passionate, generous, warm-hearted", desc: "Leos are natural born leaders. They are dramatic, creative, self-confident, dominant and extremely difficult to resist, able to achieve anything they want." },
+            { name: "Virgo", startMonth: 8, startDay: 23, element: "Earth", planet: "Mercury", strengths: "Loyal, analytical, kind, hardworking", desc: "Virgos are always paying attention to the smallest details and their deep sense of humanity makes them one of the most careful signs of the zodiac." },
+            { name: "Libra", startMonth: 9, startDay: 23, element: "Air", planet: "Venus", strengths: "Cooperative, diplomatic, gracious, fair-minded", desc: "People born under the sign of Libra are peaceful, fair, and they hate being alone. Partnership is very important for them, as their mirror and someone giving them the ability to be the mirror themselves." },
+            { name: "Scorpio", startMonth: 10, startDay: 23, element: "Water", planet: "Pluto", strengths: "Resourceful, powerful, brave, passionate", desc: "Scorpio-born are passionate and assertive people. They are determined and decisive, and will research until they find the truth. Scorpio is a great leader." },
+            { name: "Sagittarius", startMonth: 11, startDay: 22, element: "Fire", planet: "Jupiter", strengths: "Generous, idealistic, great sense of humor", desc: "Curious and energetic, Sagittarius is one of the biggest travelers among all zodiac signs. Their open mind and philosophical view motivates them to wander around the world in search of the meaning of life." }
+        ];
+
+        function findZodiac() {
+            const monthElement = document.getElementById('month');
+            const dayElement = document.getElementById('day');
+
+            const month = parseInt(monthElement.value);
+            const day = parseInt(dayElement.value);
+
+            // Basic Input Validation
+            if (!month || !day) {
+                alert("Please select both your birth month and day.");
+                return;
+            }
+
+            // Simple validation check for invalid calendar dates (e.g., February 31st)
+            if ((month === 4 || month === 6 || month === 9 || month === 11) && day === 31) {
+                alert("This month only has 30 days. Please check your selection.");
+                return;
+            }
+            if (month === 2 && day > 29) {
+                alert("February cannot have more than 29 days. Please check your selection.");
+                return;
+            }
+
+            let userSign = null;
+
+            // Algorithm to evaluate which sign range matches the input
+            for (let i = 0; i < zodiacData.length; i++) {
+                let current = zodiacData[i];
+                let next = zodiacData[(i + 1) % zodiacData.length];
+
+                // Check if date falls between current sign start and next sign start
+                if ((month === current.startMonth && day >= current.startDay) || 
+                    (month === next.startMonth && day < next.startDay)) {
+                    userSign = current;
+                    
+                    // Format and display the exact dates range for aesthetics
+                    let nextMonthName = monthElement.options[next.startMonth].text.substring(0,3);
+                    let currMonthName = monthElement.options[current.startMonth].text.substring(0,3);
+                    document.getElementById('zodiac-range').textContent = `(${currMonthName} ${current.startDay} - ${nextMonthName} ${next.startDay - 1})`;
+                    break;
+                }
+            }
+
+            // Update DOM with information
+            if (userSign) {
+                document.getElementById('zodiac-name').textContent = userSign.name;
+                document.getElementById('zodiac-element').textContent = userSign.element;
+                document.getElementById('zodiac-planet').textContent = userSign.planet;
+                document.getElementById('zodiac-strengths').textContent = userSign.strengths;
+                document.getElementById('zodiac-description').textContent = userSign.desc;
+                
+                // Show Result Card
+                document.getElementById('result').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
